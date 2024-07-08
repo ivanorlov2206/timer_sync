@@ -9,6 +9,14 @@
 static struct snd_timer *timer;
 static bool enabled;
 
+static u64 frame_rate = 8000;
+static u64 period_size = 4410;
+
+module_param(frame_rate, ullong, 0600);
+MODULE_PARM_DESC(frame_rate, "Frame rate");
+module_param(period_size, ullong, 0600);
+MODULE_PARM_DESC(period_size, "Period size");
+
 static int snd_audiosync_start(struct snd_timer *t)
 {
 	enabled = true;
@@ -106,8 +114,8 @@ static int __init mod_init(void)
 
 	timer->module = THIS_MODULE;
 	timer->hw = timer_hw;
-	timer->hw.resolution = LOW_RES_NSEC;
-	timer->hw.ticks = NANO_SEC / LOW_RES_NSEC;
+	timer->hw.resolution = NANO_SEC / frame_rate * period_size;
+	timer->hw.ticks = 1;
 	timer->max_instances = 100;
 
 	err = snd_timer_global_register(timer);
